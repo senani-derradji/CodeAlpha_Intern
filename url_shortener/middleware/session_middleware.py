@@ -1,5 +1,5 @@
 from starlette.middleware.sessions import SessionMiddleware
-from database.conf import Info
+from config.settings import Info
 
 
 def register_session_middleware(app):
