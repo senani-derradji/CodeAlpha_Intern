@@ -35,7 +35,16 @@ class ShortUrl(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    user = relationship("User", back_populates="short_urls")
+    user = relationship(
+        "User",
+        back_populates="short_urls"
+    )
+
+    clickers = relationship(
+        "ClickersInfo",
+        back_populates="short_url",
+        cascade="all, delete"
+    )
 
 
 class User(Base):
@@ -51,4 +60,41 @@ class User(Base):
 
     role = Column(String, nullable=False, default="user")
 
-    short_urls = relationship("ShortUrl", back_populates="user")
+    short_urls = relationship(
+        "ShortUrl",
+        back_populates="user"
+    )
+
+
+class ClickersInfo(Base):
+    __tablename__ = "clickers_info"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    short_url_id = Column(
+        Integer,
+        ForeignKey("short_urls.id"),
+        nullable=False
+    )
+
+    ip = Column(String, nullable=True)
+
+    user_agent = Column(String(2048), nullable=True)
+
+    browser = Column(String, nullable=True)
+
+    platform = Column(String, nullable=True)
+
+    country = Column(String, nullable=True)
+
+    city = Column(String, nullable=True)
+
+    clicked_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    short_url = relationship(
+        "ShortUrl",
+        back_populates="clickers"
+    )

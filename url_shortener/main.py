@@ -7,7 +7,6 @@ from database.db import init_db
 from starlette.middleware.sessions import SessionMiddleware
 from utils.create_super_users import create_admin_user
 
-
 from middleware.session_middleware import (
     register_session_middleware
 )
@@ -15,7 +14,6 @@ from middleware.session_middleware import (
 from middleware.cors_middleware import (
     register_cors_middleware
 )
-
 
 
 @asynccontextmanager
@@ -28,16 +26,14 @@ async def lifespan(app: FastAPI):
     )
     yield
 
-
 app = FastAPI(lifespan=lifespan)
 
-register_session_middleware(app)
-register_cors_middleware(app)
+register_cors_middleware(app)      # ← CORS 
+register_session_middleware(app)   # ← Session
 
 
 router_url_shortener = UrlShortenerAPI()
 router_auth_google = GoogleAuthAPI()
 
-
-app.include_router(router_url_shortener.router, prefix="")
-app.include_router(router_auth_google.router, prefix="")
+app.include_router(router_url_shortener.router, prefix="/url")
+app.include_router(router_auth_google.router, prefix="/auth")

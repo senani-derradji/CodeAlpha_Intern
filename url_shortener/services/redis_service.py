@@ -67,20 +67,36 @@ class RedisClient:
 
     def increment_clicks(
         self,
-        short_url: str
+        short_url: str,
+        # ip: str,
+        # user_agent: str,
+        # browser: str,
+        # platform: str
     ):
 
         self.redis_client.incr(
-            f"clicks:{short_url}"
+            f"clicks:{short_url}",
+            # f"ip:{ip}"
+            # f"user_agent:{user_agent}"
+            # f"browser:{browser}"
+            # f"platform:{platform}"
         )
 
     def get_clicks(
         self,
-        short_url: str
+        short_url: str,
+        # ip: str,
+        # user_agent: str,
+        # browser: str,
+        # platform: str
     ):
 
         clicks = self.redis_client.get(
-            f"clicks:{short_url}"
+            f"clicks:{short_url}",
+            # f"ip:{ip}",
+            # f"user_agent:{user_agent}",
+            # f"browser:{browser}",
+            # f"platform:{platform}"
         )
 
         return int(clicks) if clicks else 0

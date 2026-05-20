@@ -6,5 +6,7 @@ def register_session_middleware(app):
 
     app.add_middleware(
         SessionMiddleware,
-        secret_key=Info.SECRET_KEY
+        secret_key=Info.SECRET_KEY,
+        same_site="lax",
+        https_only=False,
     )
