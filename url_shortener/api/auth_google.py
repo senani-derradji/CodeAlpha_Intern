@@ -107,7 +107,7 @@ class GoogleAuthAPI:
             "loggedin": "1",
             "token": token,
         })
-        FRONTEND_URL = "http://localhost:5500/frontend.html"
+        FRONTEND_URL = "http://localhost:5500"
         return RedirectResponse(url=f"{FRONTEND_URL}?{params}")
 
     async def auth_me(self, request: Request):

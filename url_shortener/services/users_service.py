@@ -22,7 +22,6 @@ class UserOperations:
         if email is None:
             return None
         user = self.db.query(User).filter(User.email == email).first()
-        print("user inside get email : ", user)
         if user is None:
             return None
         return user

@@ -72,9 +72,6 @@ class UrlShortenerAPI:
             original_url=url.original_url,
             user=user.get("email")
         )
-        print("result : ", result)
-        print("user : ", user.get("email"))
-
 
         if result:
 

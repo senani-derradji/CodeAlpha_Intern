@@ -29,11 +29,11 @@ class UrlOperations:
         if self.db.query(ShortUrl).filter(ShortUrl.short_code == short_code).first():
             short_code = self.generate_short_code(original_url)
 
-        if self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url).first():
-            # return self.domain + '/url/' + self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url).first().short_code
-            return {"original_url": self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url).first().original_url,
-                    "short_url": self.domain + '/url/' + self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url).first().short_code
-                    }
+        if self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url and ShortUrl.is_active == 1).first():
+            return {
+                "original_url": self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url).first().original_url,
+                "short_url": self.domain + '/url/' + self.db.query(ShortUrl).filter(ShortUrl.original_url == original_url).first().short_code
+                }
 
         short_url = ShortUrl(
             original_url=original_url,
