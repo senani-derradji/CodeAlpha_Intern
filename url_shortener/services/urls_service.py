@@ -140,28 +140,6 @@ class UrlOperations:
         ]
 
 
-
-    async def get_all_urls(self, user):
-        print("user", user)
-
-        user_id = await self.user_ops.get_user_by_email(user)
-
-        if user is None:
-            raise ValueError("User not found")
-
-        urls = self.db.query(ShortUrl).filter(ShortUrl.user_id == user_id.id, ShortUrl.is_active == 1).all()
-        
-        return [
-            {
-                "original_url": url.original_url,
-                "short_url": f"{self.domain}/url/{url.short_code}",
-                "clicks": url.clicks,
-                "expires_at": url.expires_at
-            }
-            for url in urls
-        ]
-
-
     async def delete_url(self, short_url: str, user):
         short_code = short_url.split('/')[-1]
         data = self.db.query(ShortUrl).filter(ShortUrl.short_code == short_code, ShortUrl.is_active == 1).first()
