@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .url_endpoints import UrlShortenerAPI
-from .auth_google import GoogleAuthAPI
-from database.db import init_db
-from utils.create_super_users import create_admin_user
-from admin.admin_endpoints import router as admin_router
-from admin.admin_db import init_db as init_admin_db
+
+import os , sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from api.routers.url_endpoints import UrlShortenerAPI
+from api.routers.auth_google import GoogleAuthAPI
+from api.database.db import init_db
+from api.utils.create_super_users import create_admin_user
+from api.admin.admin_endpoints import router as admin_router
+from api.admin.admin_db import init_db as init_admin_db
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pathlib import Path

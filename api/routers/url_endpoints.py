@@ -9,13 +9,13 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi import BackgroundTasks
 
-from database.db import get_db
-from schemas.url_schema import UrlCreate
-from services.urls_service import UrlOperations
-from services.redis_service import RedisClient
-from tasks.cleanup_task import deactivate_expired_urls
+from api.database.db import get_db
+from api.schemas.url_schema import UrlCreate
+from api.services.urls_service import UrlOperations
+from api.services.redis_service import RedisClient
+from api.tasks.cleanup_task import deactivate_expired_urls
 
-from .auth_guard import AuthGuard
+from api.routers.auth_guard import AuthGuard
 import requests
 
 
