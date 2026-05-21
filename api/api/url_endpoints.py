@@ -15,7 +15,7 @@ from services.urls_service import UrlOperations
 from services.redis_service import RedisClient
 from tasks.cleanup_task import deactivate_expired_urls
 
-from api.auth_guard import AuthGuard
+from .auth_guard import AuthGuard
 import requests
 
 
@@ -176,7 +176,7 @@ class UrlShortenerAPI:
         user=Depends(AuthGuard.require_auth),
         db: Session = Depends(get_db)
     ):
-    
+
         url_ops = UrlOperations(db)
 
         result = await url_ops.get_all_urls(

@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr
 from admin.admin_db import get_db as get_admin_db       # admin SQLite
 from database.db import get_db as get_app_db            # main app db
 from admin.admin_service import AdminService
-from api.auth_guard import AuthGuard
+from .auth_guard import AuthGuard
 
 
 # ── Auth dependency ───────────────────────────────────────────────────────────

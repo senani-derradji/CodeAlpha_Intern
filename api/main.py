@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from api.url_endpoints import UrlShortenerAPI
-from api.auth_google import GoogleAuthAPI
+from .url_endpoints import UrlShortenerAPI
+from .auth_google import GoogleAuthAPI
 from database.db import init_db
 from utils.create_super_users import create_admin_user
 from admin.admin_endpoints import router as admin_router
