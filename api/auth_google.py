@@ -104,7 +104,7 @@ class GoogleAuthAPI:
             "loggedin": "1",
             "token": token,
         })
-        FRONTEND_URL = "http://localhost:8000"
+        FRONTEND_URL = Info.DOMAIN
         return RedirectResponse(url=f"{FRONTEND_URL}?{params}")
 
     async def auth_me(self, request: Request):
