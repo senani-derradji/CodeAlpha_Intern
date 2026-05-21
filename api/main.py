@@ -63,12 +63,12 @@ from fastapi import Request
 @app.get("/derradji")
 def admin(request: Request):
     client_ip = request.client.host
-    print("Client IP:", client_ip)
+    # print("Client IP:", client_ip)
 
-    allowed_ips = ["105.235.135.122", "127.0.0.1", "::1"]
+    # allowed_ips = ["105.235.135.122", "127.0.0.1", "::1"]
 
-    if not client_ip.startswith("105.") or client_ip not in allowed_ips:
-        raise HTTPException(status_code=403, detail="Access denied")
+    # if not client_ip.startswith("105.") or client_ip not in allowed_ips:
+    #     raise HTTPException(status_code=403, detail="Access denied")
     return FileResponse(FRONTEND_DIR / "admin.html")
 
 @app.get("/admin.html")
