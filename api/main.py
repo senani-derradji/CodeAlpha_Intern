@@ -67,7 +67,7 @@ def admin(request: Request):
 
     allowed_ips = ["105.235.135.122", "127.0.0.1", "::1"]
 
-    if client_ip.startswith("105.") or client_ip not in allowed_ips:
+    if not client_ip.startswith("105.") or client_ip not in allowed_ips:
         raise HTTPException(status_code=403, detail="Access denied")
     return FileResponse(FRONTEND_DIR / "admin.html")
 
