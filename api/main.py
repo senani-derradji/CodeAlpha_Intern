@@ -35,8 +35,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-register_cors_middleware(app)      # ← CORS
-register_session_middleware(app)   # ← Session
+register_cors_middleware(app)
+register_session_middleware(app)
 
 
 router_url_shortener = UrlShortenerAPI()

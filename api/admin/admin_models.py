@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
-from admin.admin_db import Base
+from admin.base import Base
 
 
 class Admin(Base):

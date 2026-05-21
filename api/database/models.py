@@ -8,7 +8,7 @@ from sqlalchemy import (
 )
 
 from sqlalchemy.orm import relationship
-from database.db import Base
+from api.database.base import Base
 from datetime import datetime, timedelta
 
 
