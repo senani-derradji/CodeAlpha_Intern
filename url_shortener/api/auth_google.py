@@ -111,6 +111,7 @@ class GoogleAuthAPI:
         return RedirectResponse(url=f"{FRONTEND_URL}?{params}")
 
     async def auth_me(self, request: Request):
+        print()
         auth_header = request.headers.get("Authorization", "")
         if not auth_header.startswith("Bearer "):
             return None

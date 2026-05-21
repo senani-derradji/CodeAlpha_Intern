@@ -1,4 +1,5 @@
 import jwt
+from datetime import datetime, timedelta, timezone
 from fastapi import Request, HTTPException
 from config.settings import Info
 
@@ -21,3 +22,9 @@ class AuthGuard:
             raise HTTPException(status_code=401, detail="Token expired")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
+
+    @staticmethod
+    def create_access_token(data: dict, expires_minutes: int = 60) -> str:
+        payload = data.copy()
+        payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)
+        return jwt.encode(payload, Info.SECRET_KEY, algorithm="HS256")
