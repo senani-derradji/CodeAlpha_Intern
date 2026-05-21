@@ -33,10 +33,8 @@ class GoogleAuthAPI:
 
         state = secrets.token_urlsafe(32)
 
-        # Sign the state as a JWT so we can verify it in the callback
-        # without needing a session cookie (which breaks cross-origin)
         state_token = jwt.encode(
-            {"state": state, "exp": time.time() + 300},  # 5 min expiry
+            {"state": state, "exp": time.time() + 300},
             Info.SECRET_KEY,
             algorithm="HS256"
         )
@@ -96,7 +94,6 @@ class GoogleAuthAPI:
 
         await self.user_ops.create_user(**user_data)
 
-        # Generate JWT for the frontend — 7 day expiry
         payload = {
             **user_data,
             "exp": time.time() + (7 * 24 * 60 * 60)
@@ -107,7 +104,7 @@ class GoogleAuthAPI:
             "loggedin": "1",
             "token": token,
         })
-        FRONTEND_URL = "http://localhost:5500"
+        FRONTEND_URL = "http://localhost:8000"
         return RedirectResponse(url=f"{FRONTEND_URL}?{params}")
 
     async def auth_me(self, request: Request):
