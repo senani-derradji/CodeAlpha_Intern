@@ -6,3 +6,9 @@ authlib>=1.2.0
 python-multipart>=0.0.6
 pydantic>=2.0.0
 flask
+dotenv
+python-jose[cryptography]
+requests
+PyJwt
+bcrypt
+pydantic[email]
