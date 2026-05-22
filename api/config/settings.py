@@ -32,5 +32,8 @@ class Info:
 
     SECRET_KEY = os.getenv("SECRET_KEY")
 
+    ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
 
 

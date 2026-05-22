@@ -1,0 +1,118 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 1 — Test
+  # ──────────────────────────────────────────────────────────────────────────
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          DATABASE_URL: "sqlite:///:memory:"
+          DATABASE_URL_ADMIN: "sqlite:///:memory:"
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          DOMAIN: "http://localhost:8000"
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REDIRECT_URI: "http://localhost:8000/auth/google/callback"
+        run: |
+          cd api
+          pytest tests.py -v --tb=short
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 2 — Build & Push Docker image  (only on push to main)
+  # ──────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
+            ${{ secrets.DOCKER_USERNAME }}/url-shortener:${{ github.sha }}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 3 — Deploy  (only on push to main, after image is built)
+  # ──────────────────────────────────────────────────────────────────────────
+#   deploy:
+#     name: Deploy to Server
+#     runs-on: ubuntu-latest
+#     needs: build
+#     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+#     steps:
+#       - name: Deploy via SSH
+#         uses: appleboy/ssh-action@v1
+#         with:
+#           host: ${{ secrets.SERVER_HOST }}
+#           username: ${{ secrets.SERVER_USER }}
+#           key: ${{ secrets.SERVER_SSH_KEY }}
+#           script: |
+#             docker pull ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
+
+#             docker stop url-shortener || true
+#             docker rm   url-shortener || true
+
+#             docker run -d \
+#               --name url-shortener \
+#               --restart unless-stopped \
+#               -p 8000:8000 \
+#               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+#               -e DATABASE_URL_ADMIN="${{ secrets.DATABASE_URL_ADMIN }}" \
+#               -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
+#               -e REDIS_HOST="${{ secrets.REDIS_HOST }}" \
+#               -e REDIS_PORT="${{ secrets.REDIS_PORT }}" \
+#               -e REDIS_USERNAME="${{ secrets.REDIS_USERNAME }}" \
+#               -e REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}" \
+#               -e DOMAIN="${{ secrets.DOMAIN }}" \
+#               -e ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}" \
+#               -e ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}" \
+#               -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
+#               -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
+#               -e GOOGLE_REDIRECT_URI="${{ secrets.GOOGLE_REDIRECT_URI }}" \
+#               ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
+
+#             docker image prune -f

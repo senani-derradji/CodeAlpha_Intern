@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from admin.admin_models import Admin
 from admin.admin_db import get_db, init_db
 from security.hash_ import _pwd_ctx
+from config.settings import Info
 
 
 def create_admin_user():
@@ -9,9 +10,9 @@ def create_admin_user():
 
     db: Session = next(get_db())
 
-    email    = "admin@admin.admin"
-    name     = "Admin"
-    password = "admin"
+    email    = Info.ADMIN_EMAIL
+    name     = Info.ADMIN_EMAIL.split("@")[0]
+    password = Info.ADMIN_PASSWORD
 
     try:
         if db.query(Admin).filter(Admin.email == email).first():
