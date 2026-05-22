@@ -25,8 +25,7 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
 
       - name: Run tests
         env:
@@ -43,7 +42,6 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI: "http://localhost:8000/auth/google/callback"
-
         run: |
           cd api
           pytest tests.py -v --tb=short
@@ -71,12 +69,8 @@ jobs:
           pip install pip-audit bandit
 
       - name: Create reports directory
-        run: |
-          mkdir -p security-reports
+        run: mkdir -p security-reports
 
-      # ─────────────────────────────────────────────
-      # pip-audit
-      # ─────────────────────────────────────────────
       - name: Run pip-audit
         continue-on-error: true
         run: |
@@ -84,9 +78,6 @@ jobs:
             --format=json \
             --output=security-reports/pip-audit.json
 
-      # ─────────────────────────────────────────────
-      # Bandit
-      # ─────────────────────────────────────────────
       - name: Run Bandit
         continue-on-error: true
         run: |
@@ -94,76 +85,72 @@ jobs:
             -f json \
             -o security-reports/bandit-report.json
 
-      # ─────────────────────────────────────────────
-      # Build Docker image
-      # ─────────────────────────────────────────────
       - name: Build Docker image
-        run: |
-          docker build -t url-shortener:scan .
+        run: docker build -t url-shortener:scan .
 
-      # ─────────────────────────────────────────────
-      # Trivy SARIF scan
-      # ─────────────────────────────────────────────
+      # FIX 1: @v0 does not exist — pin to a real release tag
       - name: Run Trivy SARIF scan
         continue-on-error: true
-        uses: aquasecurity/trivy-action@v0
+        uses: aquasecurity/trivy-action@0.32.0
         with:
           image-ref: "url-shortener:scan"
           format: "sarif"
           output: "security-reports/trivy-results.sarif"
           severity: "CRITICAL,HIGH"
 
-      # ─────────────────────────────────────────────
-      # Trivy table report
-      # ─────────────────────────────────────────────
       - name: Run Trivy Table scan
         continue-on-error: true
-        uses: aquasecurity/trivy-action@v0
+        uses: aquasecurity/trivy-action@0.32.0
         with:
           image-ref: "url-shortener:scan"
           format: "table"
           output: "security-reports/trivy-report.txt"
           severity: "CRITICAL,HIGH"
 
-      # ─────────────────────────────────────────────
-      # Generate Markdown summary
-      # ─────────────────────────────────────────────
+      # FIX 4: embed actual scan results so the report isn't just a file list
       - name: Generate Markdown summary
         continue-on-error: true
         run: |
           echo "# Security Scan Report" > security-reports/report.md
           echo "" >> security-reports/report.md
-
-          echo "## Generated Reports" >> security-reports/report.md
-          echo "- pip-audit.json" >> security-reports/report.md
-          echo "- bandit-report.json" >> security-reports/report.md
-          echo "- trivy-results.sarif" >> security-reports/report.md
-          echo "- trivy-report.txt" >> security-reports/report.md
-
+          echo "## pip-audit" >> security-reports/report.md
+          if [ -f security-reports/pip-audit.json ]; then
+            count=$(python3 -c "import json,sys; d=json.load(open('security-reports/pip-audit.json')); print(len(d.get('dependencies',[])))" 2>/dev/null || echo "unknown")
+            echo "Vulnerabilities found: $count" >> security-reports/report.md
+          else
+            echo "Report not generated." >> security-reports/report.md
+          fi
           echo "" >> security-reports/report.md
-          echo "All scans completed successfully." >> security-reports/report.md
+          echo "## Bandit" >> security-reports/report.md
+          if [ -f security-reports/bandit-report.json ]; then
+            high=$(python3 -c "import json; d=json.load(open('security-reports/bandit-report.json')); print(d.get('metrics',{}).get('_totals',{}).get('SEVERITY.HIGH',0))" 2>/dev/null || echo "?")
+            med=$(python3 -c "import json; d=json.load(open('security-reports/bandit-report.json')); print(d.get('metrics',{}).get('_totals',{}).get('SEVERITY.MEDIUM',0))" 2>/dev/null || echo "?")
+            echo "HIGH: $high | MEDIUM: $med" >> security-reports/report.md
+          else
+            echo "Report not generated." >> security-reports/report.md
+          fi
+          echo "" >> security-reports/report.md
+          echo "## Trivy" >> security-reports/report.md
+          if [ -f security-reports/trivy-report.txt ]; then
+            cat security-reports/trivy-report.txt >> security-reports/report.md
+          else
+            echo "Report not generated." >> security-reports/report.md
+          fi
 
-      # ─────────────────────────────────────────────
-      # Install PDF tools
-      # ─────────────────────────────────────────────
+      # FIX 2: wkhtmltopdf is broken on Ubuntu 24 — use weasyprint instead
       - name: Install PDF tools
         continue-on-error: true
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc wkhtmltopdf
+          sudo apt-get install -y pandoc weasyprint
 
-      # ─────────────────────────────────────────────
-      # Convert Markdown → PDF
-      # ─────────────────────────────────────────────
       - name: Generate PDF report
         continue-on-error: true
         run: |
           pandoc security-reports/report.md \
+            --pdf-engine=weasyprint \
             -o security-reports/security-report.pdf
 
-      # ─────────────────────────────────────────────
-      # Upload reports as artifacts
-      # ─────────────────────────────────────────────
       - name: Upload Security Reports
         uses: actions/upload-artifact@v4
         with:
@@ -189,11 +176,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # FIX 3: @v5 is outdated; @v6 is current. Added cache-from/cache-to
+      #        to avoid rebuilding unchanged layers on every push.
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/url-shortener:cache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/url-shortener:cache,mode=max
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/url-shortener:latest
             ${{ secrets.DOCKER_USERNAME }}/url-shortener:${{ github.sha }}
