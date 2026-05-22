@@ -454,7 +454,7 @@
 <!-- ════════════════ LOGIN SCREEN ════════════════ -->
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-logo">⚡ Admin Panel</div>
+    <div class="login-logo">A D M I N   P A N E L</div>
     <div class="login-title">Sign in</div>
     <div class="login-sub">Enter your admin credentials to continue</div>
     <div class="field-group">
@@ -876,8 +876,8 @@ function renderTopUrls(urls) {
   tb.innerHTML = urls.map((u,i) => `
     <tr>
       <td style="color:var(--muted)">${i+1}</td>
-      <td><span style="font-family:var(--mono)">${u.short_code}</span></td>
-      <td title="${u.original_url}"><a href="${u.original_url}" target="_blank" style="color:var(--accent);text-decoration:none">${truncate(u.original_url)}</a></td>
+      <td><span style="font-family:var(--mono)">${esc(u.short_code)}</span></td>
+      <td title="${esc(u.original_url)}"><a href="${safeHref(u.original_url)}" target="_blank" …>${truncate(esc(u.original_url))}</a>
       <td style="font-family:var(--mono)">${fmt(u.clicks)}</td>
       <td><span class="badge ${u.is_active?'badge-green':'badge-red'}">${u.is_active?'active':'inactive'}</span></td>
     </tr>`).join('');
@@ -910,17 +910,17 @@ async function loadUsers() {
             <div class="admin-avatar" style="width:26px;height:26px;font-size:.6rem">
               ${u.picture ? `<img src="${u.picture}" alt="">` : u.name.slice(0,2).toUpperCase()}
             </div>
-            ${u.name}
+            ${esc(u.name)}
           </div>
         </td>
-        <td style="color:var(--muted)">${u.email}</td>
-        <td><span class="badge ${u.role==='admin'?'badge-blue':'badge-yellow'}">${u.role}</span></td>
+        <td style="color:var(--muted)">${esc(u.email)}</td>
+        <td><span class="badge ${u.role==='admin'?'badge-blue':'badge-yellow'}">${esc(u.role)}</span></td>
         <td style="font-family:var(--mono)">${u.url_count}</td>
         <td>
           <div style="display:flex;gap:6px">
             <button class="btn" style="padding:4px 10px;font-size:.75rem" onclick="viewUser(${u.id})">View</button>
-            <button class="btn" style="padding:4px 10px;font-size:.75rem" onclick="toggleUserRole(${u.id},'${u.role}')">${u.role==='admin'?'Demote':'Promote'}</button>
-            <button class="btn btn-danger" style="padding:4px 10px;font-size:.75rem" onclick="deleteUser(${u.id},'${u.name}')">Delete</button>
+            <button class="btn" style="padding:4px 10px;font-size:.75rem" data-id="${u.id}" data-role="${esc(u.role)}" class="js-toggle-role">${u.role==='admin'?'Demote':'Promote'}</button>
+            <button class="btn btn-danger" style="padding:4px 10px;font-size:.75rem" data-id="${u.id}" data-name="${esc(u.name)}" class="js-delete-user"">Delete</button>
           </div>
         </td>
       </tr>`).join('');

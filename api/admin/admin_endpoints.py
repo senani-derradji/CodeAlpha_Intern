@@ -27,7 +27,7 @@ def get_svc(
 
 # ── Request body ──────────────────────────────────────────────────────────────
 class AdminLoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 router = APIRouter()
