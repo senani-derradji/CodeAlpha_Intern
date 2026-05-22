@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from config.settings import Info
 from utils.generate_short_code import generate
 from services.users_service import UserOperations
-
+from typing import Optional
 
 
 class UrlOperations:
@@ -59,11 +59,11 @@ class UrlOperations:
 
     async def change_clicks(
         self,
-        short_url: str,
-        ip: str,
-        user_agent: str,
-        browser: str,
-        platform: str
+        short_url: str ,
+        ip: Optional[str] = None,
+        user_agent: Optional[str] = None,
+        browser: Optional[str] = None,
+        platform: Optional[str] = None,
     ):
 
         short_code = short_url.split('/')[-1]
@@ -86,12 +86,12 @@ class UrlOperations:
 
         clicker = ClickersInfo(
             short_url_id=data.id,
-            ip=ip,
-            user_agent=user_agent,
-            browser=browser,
-            platform=platform,
-            country=country,
-            city=city
+            ip=ip if ip else "Unknown",
+            user_agent=user_agent if user_agent else "Unknown",
+            browser=browser if browser else "Unknown",
+            platform=platform if platform else "Unknown",
+            country=country if country else "Unknown",
+            city=city if city else "Unknown"
         )
 
         self.db.add(clicker)
